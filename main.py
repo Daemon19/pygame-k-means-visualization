@@ -15,15 +15,16 @@ def main():
     running = True
     data = [pos * [SCREEN_W, SCREEN_H] for pos in np.random.rand(100, 2)]
     centroids = [pos * [SCREEN_W, SCREEN_H] for pos in np.random.rand(3, 2)]
+    centroids_data = closest_centroids_data(data, centroids)
 
-    centroids_data = [[] for _ in centroids]
-    for d in data:
-        centroids_data[closest_to(d, centroids)].append(d)
-    
     while running:
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 running = False
+            if event.type == pg.KEYDOWN:
+                if event.key == pg.K_SPACE:
+                    centroids = [np.mean(cd, 0) for cd in centroids_data]
+                    centroids_data = closest_centroids_data(data, centroids)
 
         screen.fill("black")
 
@@ -45,7 +46,19 @@ def main():
 
 
 def closest_to(point, centroids):
-    return min(enumerate(map(lambda c: pg.Vector2(c[0], c[1]).distance_squared_to(point), centroids)), key=lambda l: l[1])[0]
+    return min(
+        enumerate(
+            map(lambda c: pg.Vector2(c[0], c[1]).distance_squared_to(point), centroids)
+        ),
+        key=lambda l: l[1],
+    )[0]
+
+
+def closest_centroids_data(data, centroids):
+    centroids_data = [[] for _ in centroids]
+    for d in data:
+        centroids_data[closest_to(d, centroids)].append(d)
+    return centroids_data
 
 
 if __name__ == "__main__":
